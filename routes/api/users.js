@@ -3,6 +3,8 @@ var router = express.Router();
 var { User } = require("../../model/users");
 var bcrypt = require("bcryptjs");
 var _ = require("lodash");
+var jwt = require("jsonwebtoken");
+var config = require("config");
 
 router.post("/register", async (req, res) => {
   var email = req.body.email;
@@ -23,7 +25,11 @@ router.post("/login", async (req, res) => {
   if (!user) return res.status(401).send("This email is not registered");
   const isValid = await bcrypt.compare(req.body.password, user.password);
   if (!isValid) return res.status(401).send("Password incorrect");
-  res.send("login successful");
+  var token = jwt.sign(
+    { _id: user._id, name: user.name },
+    config.get("jwtPrivateKey")
+  );
+  res.send(token);
 });
 
 module.exports = router;
