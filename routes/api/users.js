@@ -1,14 +1,21 @@
 var express = require("express");
 var router = express.Router();
 var { User } = require("../../model/users");
+var bcrypt = require("bcryptjs");
+var _ = require("lodash");
 
 router.post("/register", async (req, res) => {
-  var user = new User();
+  var email = req.body.email;
+  let user = await User.findOne({ email });
+  if (user) return res.status(400).send("User with this email already exist");
+  user = new User();
   user.name = req.body.name;
   user.email = req.body.email;
   user.password = req.body.password;
+  var salt = await bcrypt.genSalt(10);
+  user.password = await bcrypt.hash(user.password, salt);
   await user.save();
-  res.send(user);
+  res.send(_.pick(user, ["name", "email"]));
 });
 
 module.exports = router;
