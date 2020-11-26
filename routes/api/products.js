@@ -2,9 +2,11 @@ var express = require("express");
 var router = express.Router();
 var { Product } = require("../../model/products");
 var validateProduct = require("../../middleware/validate");
+var auth = require("../../middleware/auth");
 
 //get all the records
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
+  console.log(req.user);
   //pagination
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
